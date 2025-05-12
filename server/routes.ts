@@ -1,6 +1,17 @@
-import type { Express, Request, Response, NextFunction } from "express";
+import type { Express, Response, NextFunction } from "express";
+import type { Request as ExpressRequest } from "express";
+
+// Extended Request type with user property
+interface Request extends ExpressRequest {
+  user?: {
+    id: number;
+    email: string;
+    role: string;
+  };
+}
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { generateRecommendations, type RecommendationRequest } from "./utils/openai";
 import { 
   insertContactSchema, 
   insertUserSchema,
@@ -185,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user profile
   app.get("/api/user/profile", authenticateToken, async (req, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user!.id;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -530,6 +541,215 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(200).json({
         success: true,
         chatLogs
+      });
+    } catch (error) {
+      handleError(error, res);
+    }
+  });
+
+  // User Preferences endpoints
+  // Get user preferences
+  app.get("/api/user/preferences", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const preferences = await storage.getUserPreferences(userId);
+      
+      res.status(200).json({
+        success: true,
+        preferences: preferences || null
+      });
+    } catch (error) {
+      handleError(error, res);
+    }
+  });
+
+  // Create or update user preferences
+  app.post("/api/user/preferences", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      // Check if preferences already exist
+      const existingPreferences = await storage.getUserPreferences(userId);
+      
+      if (existingPreferences) {
+        // Update existing preferences
+        const updatedPreferences = await storage.updateUserPreferences(
+          userId,
+          { ...req.body }
+        );
+        
+        res.status(200).json({
+          success: true,
+          preferences: updatedPreferences
+        });
+      } else {
+        // Create new preferences
+        const preferencesData = insertUserPreferencesSchema.parse({
+          userId,
+          ...req.body
+        });
+        
+        const preferences = await storage.createUserPreferences(preferencesData);
+        
+        res.status(201).json({
+          success: true,
+          preferences
+        });
+      }
+    } catch (error) {
+      handleError(error, res);
+    }
+  });
+
+  // User activity tracking
+  app.post("/api/user/activity", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      const activityData = insertUserActivitySchema.parse({
+        userId,
+        ...req.body,
+        // Ensure createdAt is a valid date if provided, otherwise use current time
+        createdAt: req.body.createdAt ? new Date(req.body.createdAt) : new Date()
+      });
+      
+      const activity = await storage.createUserActivity(activityData);
+      
+      res.status(201).json({
+        success: true,
+        activity
+      });
+    } catch (error) {
+      handleError(error, res);
+    }
+  });
+
+  // AI Recommendations endpoints
+  // Get recommendations for a user
+  app.get("/api/recommendations", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const recommendations = await storage.getRecommendationsByUser(userId);
+      
+      res.status(200).json({
+        success: true,
+        recommendations
+      });
+    } catch (error) {
+      handleError(error, res);
+    }
+  });
+
+  // Generate new AI recommendations
+  app.post("/api/recommendations/generate", authenticateToken, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      // Get user preferences
+      const preferences = await storage.getUserPreferences(userId);
+      
+      // Get recent user activities (last 30 days)
+      const recentActivities = await storage.getRecentUserActivities(userId, 30);
+      
+      // Get current tools used by the user
+      const userTools = await storage.getAiToolsByUser(userId);
+      
+      // Prepare request for OpenAI
+      const request: RecommendationRequest = {
+        userId,
+        userIndustry: preferences?.industry,
+        businessSize: preferences?.businessSize,
+        existingTools: userTools.map(tool => tool.toolType),
+        interests: preferences?.interests as string[] || [],
+        recentActions: recentActivities.map(activity => ({
+          type: activity.activityType,
+          entity: activity.entityType,
+          timestamp: activity.createdAt
+        }))
+      };
+      
+      // Generate recommendations
+      const aiRecommendations = await generateRecommendations(request);
+      
+      // Save recommendations to database
+      const savedRecommendations = [];
+      
+      for (const rec of aiRecommendations) {
+        const recommendationData = {
+          userId,
+          toolType: rec.toolType as any, // Cast to appropriate enum type
+          toolName: rec.toolName,
+          score: parseInt(rec.score.toString()),
+          reason: rec.reason,
+          metadata: { originalResponse: rec }
+        };
+        
+        const savedRec = await storage.createRecommendation(recommendationData);
+        savedRecommendations.push(savedRec);
+      }
+      
+      // Clean up old recommendations, keeping only the 10 most recent
+      await storage.deleteOldRecommendations(userId, 10);
+      
+      res.status(200).json({
+        success: true,
+        recommendations: savedRecommendations
+      });
+    } catch (error) {
+      handleError(error, res);
+    }
+  });
+
+  // Mark recommendation as clicked
+  app.post("/api/recommendations/:id/click", authenticateToken, async (req, res) => {
+    try {
+      const recommendationId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      
+      // Update the recommendation
+      const updatedRecommendation = await storage.updateRecommendation(
+        recommendationId,
+        { clicked: true }
+      );
+      
+      if (!updatedRecommendation) {
+        return res.status(404).json({
+          success: false,
+          message: "Recommendation not found"
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        recommendation: updatedRecommendation
+      });
+    } catch (error) {
+      handleError(error, res);
+    }
+  });
+
+  // Mark recommendation as implemented
+  app.post("/api/recommendations/:id/implement", authenticateToken, async (req, res) => {
+    try {
+      const recommendationId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      
+      // Update the recommendation
+      const updatedRecommendation = await storage.updateRecommendation(
+        recommendationId,
+        { implemented: true }
+      );
+      
+      if (!updatedRecommendation) {
+        return res.status(404).json({
+          success: false,
+          message: "Recommendation not found"
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        recommendation: updatedRecommendation
       });
     } catch (error) {
       handleError(error, res);
