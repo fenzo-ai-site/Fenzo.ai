@@ -6,10 +6,13 @@ import {
   subscriptions, type Subscription, type InsertSubscription,
   chatLogs, type ChatLog, type InsertChatLog,
   leads, type Lead, type InsertLead,
-  appointments, type Appointment, type InsertAppointment
+  appointments, type Appointment, type InsertAppointment,
+  userPreferences, type UserPreferences, type InsertUserPreferences,
+  aiRecommendations, type AiRecommendation, type InsertAiRecommendation,
+  userActivities, type UserActivity, type InsertUserActivity
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, gte, inArray, sql } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -56,6 +59,22 @@ export interface IStorage {
   createAppointment(appointment: InsertAppointment): Promise<Appointment>;
   getAppointmentsByUser(userId: number): Promise<Appointment[]>;
   updateAppointment(id: number, appointment: Partial<InsertAppointment>): Promise<Appointment | undefined>;
+  
+  // User Preferences operations
+  getUserPreferences(userId: number): Promise<UserPreferences | undefined>;
+  createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences>;
+  updateUserPreferences(userId: number, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined>;
+  
+  // AI Recommendations operations
+  createRecommendation(recommendation: InsertAiRecommendation): Promise<AiRecommendation>;
+  getRecommendationsByUser(userId: number): Promise<AiRecommendation[]>;
+  updateRecommendation(id: number, recommendation: Partial<InsertAiRecommendation>): Promise<AiRecommendation | undefined>;
+  deleteOldRecommendations(userId: number, keepCount: number): Promise<number>;
+  
+  // User Activity operations
+  createUserActivity(activity: InsertUserActivity): Promise<UserActivity>;
+  getUserActivitiesByUser(userId: number, limit?: number): Promise<UserActivity[]>;
+  getRecentUserActivities(userId: number, timeWindow?: number): Promise<UserActivity[]>;
 }
 
 // Database storage implementation
@@ -287,6 +306,116 @@ export class DatabaseStorage implements IStorage {
       .where(eq(appointments.id, id))
       .returning();
     return appointment;
+  }
+
+  // User Preferences operations
+  async getUserPreferences(userId: number): Promise<UserPreferences | undefined> {
+    const [preferences] = await db
+      .select()
+      .from(userPreferences)
+      .where(eq(userPreferences.userId, userId));
+    return preferences;
+  }
+
+  async createUserPreferences(insertPreferences: InsertUserPreferences): Promise<UserPreferences> {
+    const [preferences] = await db
+      .insert(userPreferences)
+      .values(insertPreferences)
+      .returning();
+    return preferences;
+  }
+
+  async updateUserPreferences(userId: number, preferencesData: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
+    const [preferences] = await db
+      .update(userPreferences)
+      .set(preferencesData)
+      .where(eq(userPreferences.userId, userId))
+      .returning();
+    return preferences;
+  }
+
+  // AI Recommendations operations
+  async createRecommendation(insertRecommendation: InsertAiRecommendation): Promise<AiRecommendation> {
+    const [recommendation] = await db
+      .insert(aiRecommendations)
+      .values(insertRecommendation)
+      .returning();
+    return recommendation;
+  }
+
+  async getRecommendationsByUser(userId: number): Promise<AiRecommendation[]> {
+    return await db
+      .select()
+      .from(aiRecommendations)
+      .where(eq(aiRecommendations.userId, userId))
+      .orderBy(desc(aiRecommendations.createdAt));
+  }
+
+  async updateRecommendation(id: number, recommendationData: Partial<InsertAiRecommendation>): Promise<AiRecommendation | undefined> {
+    const [recommendation] = await db
+      .update(aiRecommendations)
+      .set(recommendationData)
+      .where(eq(aiRecommendations.id, id))
+      .returning();
+    return recommendation;
+  }
+
+  async deleteOldRecommendations(userId: number, keepCount: number): Promise<number> {
+    // Get all recommendations for the user, sorted by creation date (newest first)
+    const userRecommendations = await this.getRecommendationsByUser(userId);
+    
+    // If there are fewer recommendations than the keep count, do nothing
+    if (userRecommendations.length <= keepCount) {
+      return 0;
+    }
+    
+    // Get the IDs of recommendations to delete
+    const recommendationsToDelete = userRecommendations
+      .slice(keepCount)
+      .map(recommendation => recommendation.id);
+    
+    // Delete the old recommendations
+    await db
+      .delete(aiRecommendations)
+      .where(and(
+        eq(aiRecommendations.userId, userId),
+        inArray(aiRecommendations.id, recommendationsToDelete)
+      ));
+    
+    return recommendationsToDelete.length;
+  }
+
+  // User Activity operations
+  async createUserActivity(insertActivity: InsertUserActivity): Promise<UserActivity> {
+    const [activity] = await db
+      .insert(userActivities)
+      .values(insertActivity)
+      .returning();
+    return activity;
+  }
+
+  async getUserActivitiesByUser(userId: number, limit = 100): Promise<UserActivity[]> {
+    return await db
+      .select()
+      .from(userActivities)
+      .where(eq(userActivities.userId, userId))
+      .orderBy(desc(userActivities.createdAt))
+      .limit(limit);
+  }
+
+  async getRecentUserActivities(userId: number, timeWindow = 30): Promise<UserActivity[]> {
+    // Get activities from the last X days
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - timeWindow);
+    
+    return await db
+      .select()
+      .from(userActivities)
+      .where(and(
+        eq(userActivities.userId, userId),
+        gte(userActivities.createdAt, cutoffDate)
+      ))
+      .orderBy(desc(userActivities.createdAt));
   }
 }
 

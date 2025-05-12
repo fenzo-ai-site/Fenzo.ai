@@ -7,7 +7,10 @@ import {
   insertAiToolSchema,
   insertLeadSchema,
   insertAppointmentSchema,
-  insertChatLogSchema
+  insertChatLogSchema,
+  insertUserPreferencesSchema,
+  insertUserActivitySchema,
+  insertAiRecommendationSchema
 } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import bcrypt from "bcryptjs";
