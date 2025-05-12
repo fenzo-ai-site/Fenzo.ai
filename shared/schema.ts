@@ -16,12 +16,15 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   aiTools: many(aiTools),
   subscriptions: many(subscriptions),
   chatLogs: many(chatLogs),
   leads: many(leads),
   appointments: many(appointments),
+  preferences: one(userPreferences),
+  activities: many(userActivities),
+  recommendations: many(aiRecommendations),
 }));
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -276,3 +279,105 @@ export const insertAppointmentSchema = createInsertSchema(appointments).pick({
 
 export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type Appointment = typeof appointments.$inferSelect;
+
+// User Preferences
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  industry: text("industry"),
+  businessSize: text("business_size"),
+  interests: json("interests").default([]),
+  preferredLanguages: json("preferred_languages").default([]),
+  preferredTools: json("preferred_tools").default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const userPreferencesRelations = relations(userPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [userPreferences.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).pick({
+  userId: true,
+  industry: true,
+  businessSize: true,
+  interests: true,
+  preferredLanguages: true,
+  preferredTools: true,
+});
+
+export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+export type UserPreferences = typeof userPreferences.$inferSelect;
+
+// AI Recommendations
+export const aiRecommendations = pgTable("ai_recommendations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  toolId: integer("tool_id").references(() => aiTools.id),
+  toolType: toolTypeEnum("tool_type").notNull(),
+  toolName: text("tool_name").notNull(),
+  score: integer("score").notNull(),
+  reason: text("reason").notNull(),
+  metadata: json("metadata"),
+  clicked: boolean("clicked").default(false),
+  implemented: boolean("implemented").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const aiRecommendationsRelations = relations(aiRecommendations, ({ one }) => ({
+  user: one(users, {
+    fields: [aiRecommendations.userId],
+    references: [users.id],
+  }),
+  tool: one(aiTools, {
+    fields: [aiRecommendations.toolId],
+    references: [aiTools.id],
+  }),
+}));
+
+export const insertAiRecommendationSchema = createInsertSchema(aiRecommendations).pick({
+  userId: true,
+  toolId: true,
+  toolType: true,
+  toolName: true,
+  score: true,
+  reason: true,
+  metadata: true,
+  clicked: true,
+  implemented: true,
+});
+
+export type InsertAiRecommendation = z.infer<typeof insertAiRecommendationSchema>;
+export type AiRecommendation = typeof aiRecommendations.$inferSelect;
+
+// User Activity Tracking
+export const userActivities = pgTable("user_activities", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  activityType: text("activity_type").notNull(),
+  entityType: text("entity_type").notNull(),
+  entityId: integer("entity_id"),
+  metadata: json("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userActivitiesRelations = relations(userActivities, ({ one }) => ({
+  user: one(users, {
+    fields: [userActivities.userId],
+    references: [users.id],
+  }),
+}));
+
+export const insertUserActivitySchema = createInsertSchema(userActivities).pick({
+  userId: true,
+  activityType: true,
+  entityType: true,
+  entityId: true,
+  metadata: true,
+});
+
+export type InsertUserActivity = z.infer<typeof insertUserActivitySchema>;
+export type UserActivity = typeof userActivities.$inferSelect;
