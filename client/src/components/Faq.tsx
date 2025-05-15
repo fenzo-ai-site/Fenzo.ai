@@ -10,12 +10,12 @@ import {
 export default function Faq() {
   const faqs = [
     {
-      question: "How do I get started with BizAI Boosters?",
+      question: "How do I get started with Fenzo AI Boosters?",
       answer: "Getting started is easy! Simply sign up for an account, choose your plan, and select the AI tools you want to use. Our guided setup process will help you configure each tool for your specific business needs. If you need assistance, our support team is always available to help."
     },
     {
       question: "Do I need technical skills to use the platform?",
-      answer: "No technical skills required! BizAI Boosters is designed to be user-friendly for business owners of all technical levels. Our platform uses simple, guided interfaces to help you set up and manage your AI tools. If you ever get stuck, our comprehensive tutorials and support team are ready to assist."
+      answer: "No technical skills required! Fenzo AI Boosters is designed to be user-friendly for business owners of all technical levels. Our platform uses simple, guided interfaces to help you set up and manage your AI tools. If you ever get stuck, our comprehensive tutorials and support team are ready to assist."
     },
     {
       question: "Which Indian languages are supported?",
@@ -26,7 +26,7 @@ export default function Faq() {
       answer: "Absolutely! Data security is our top priority. We use enterprise-grade encryption for all data and are compliant with Indian data protection regulations. Your business data never leaves our secure servers, and we have strict access controls in place. Additionally, we regularly conduct security audits to ensure your information remains protected."
     },
     {
-      question: "Can I try BizAI Boosters before committing?",
+      question: "Can I try Fenzo AI Boosters before committing?",
       answer: "Yes! We offer a 7-day free trial that gives you access to all features of our Growth plan. This allows you to test our AI tools with your business before making a decision. No credit card is required for the trial, and you can cancel anytime. If you need more time to evaluate, our sales team can arrange an extended trial period."
     },
     {
@@ -47,7 +47,7 @@ export default function Faq() {
         >
           <h2 className="text-3xl md:text-4xl font-bold font-poppins mb-4">Frequently Asked Questions</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Get answers to common questions about BizAI Boosters and how it can help your business.
+            Get answers to common questions about Fenzo AI Boosters and how it can help your business.
           </p>
         </motion.div>
         

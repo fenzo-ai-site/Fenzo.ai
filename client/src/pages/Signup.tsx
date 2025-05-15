@@ -85,7 +85,7 @@ export default function Signup() {
           <Link href="/" className="flex items-center space-x-2 mb-6">
             <Bot className="h-8 w-8 text-primary" />
             <span className="font-poppins font-bold text-xl">
-              BizAI <span className="text-accent">Boosters</span>
+              Fenzo AI <span className="text-accent">Boosters</span>
             </span>
           </Link>
           <h1 className="text-2xl font-bold">Create your account</h1>

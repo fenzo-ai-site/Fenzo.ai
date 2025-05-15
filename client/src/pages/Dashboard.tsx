@@ -119,7 +119,7 @@ export default function Dashboard() {
           <Link href="/" className="flex items-center space-x-2">
             <Bot className="h-6 w-6 text-primary" />
             <span className="font-bold text-lg">
-              BizAI <span className="text-accent">Boosters</span>
+              Fenzo AI <span className="text-accent">Boosters</span>
             </span>
           </Link>
         </div>
@@ -277,7 +277,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="analytics">
-              <h2 className="text-lg font-medium mb-6">Analytics Dashboard</h2>
+              <h2 className="text-lg font-medium mb-6">Analytics</h2>
               <Card>
                 <CardHeader>
                   <CardTitle>Business Analytics</CardTitle>

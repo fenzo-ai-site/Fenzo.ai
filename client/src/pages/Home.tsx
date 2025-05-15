@@ -15,7 +15,7 @@ import BackToTop from "@/components/BackToTop";
 export default function Home() {
   useEffect(() => {
     // Set page title
-    document.title = "BizAI Boosters - AI-Powered Tools for Indian Businesses";
+    document.title = "Fenzo AI Boosters - AI-Powered Tools for Indian Businesses";
   }, []);
 
   return (

@@ -22,7 +22,7 @@ export default function Features() {
     },
     {
       title: "Proven Results",
-      description: "Businesses using our platform see an average 43% increase in efficiency and 28% growth in revenue.",
+      description: "Businesses using our platform see significant growth in revenue and improved operational efficiency.",
       icon: <TrendingUp className="text-primary text-2xl h-6 w-6" />
     },
     {
@@ -72,7 +72,7 @@ export default function Features() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold font-poppins mb-4">Why Choose BizAI Boosters?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold font-poppins mb-4">Why Choose Fenzo AI Boosters?</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Our platform is designed with Indian businesses in mind, providing powerful AI tools that are easy to use and deliver real results.
           </p>

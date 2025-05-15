@@ -11,29 +11,37 @@ export default function Testimonials() {
     {
       name: "Rajesh Kumar",
       role: "Restaurant Owner, Mumbai",
-      image: "https://randomuser.me/api/portraits/men/75.jpg",
       content: "The WhatsApp Chatbot has been a game-changer for our restaurant. It handles reservations 24/7 and answers common questions, freeing up my staff to focus on providing great service.",
       rating: 5
     },
     {
       name: "Priya Sharma",
       role: "Boutique Owner, Delhi",
-      image: "https://randomuser.me/api/portraits/women/65.jpg",
       content: "The Social Media Post Writer saves me hours every week. It creates trendy content for my fashion boutique that resonates with my audience. My engagement has increased by 60%!",
       rating: 4.5
     },
     {
       name: "Vikram Patel",
       role: "IT Service Provider, Bangalore",
-      image: "https://randomuser.me/api/portraits/men/45.jpg",
       content: "We implemented the Local Language AI Chat and it's been amazing. Our customers in Tamil Nadu and Karnataka can now get support in their preferred languages. Customer satisfaction is up by 45%.",
       rating: 5
     },
     {
       name: "Ananya Reddy",
       role: "E-commerce Owner, Chennai",
-      image: "https://randomuser.me/api/portraits/women/28.jpg",
       content: "The Lead Collector AI has transformed our business. It engages with website visitors, collects their information, and sends it directly to our sales team. Our conversion rate has doubled!",
+      rating: 4.5
+    },
+    {
+      name: "Arjun",
+      role: "Hotel Manager, Jaipur",
+      content: "The Room Availability AI has streamlined our booking process. It handles inquiries in multiple languages and updates our availability in real-time. Our occupancy rate has increased by 30%.",
+      rating: 5
+    },
+    {
+      name: "Meera",
+      role: "Salon Owner, Hyderabad",
+      content: "The Appointment Booking AI has made scheduling so much easier. It sends automated reminders to clients and handles rescheduling requests. No-shows have decreased by 40%!",
       rating: 4.5
     }
   ];
@@ -79,7 +87,7 @@ export default function Testimonials() {
         >
           <h2 className="text-3xl md:text-4xl font-bold font-poppins mb-4">What Indian Businesses Say</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Don't just take our word for it. Hear from business owners who've transformed their operations with BizAI Boosters.
+            Don't just take our word for it. Hear from business owners who've transformed their operations with Fenzo AI Boosters.
           </p>
         </motion.div>
         
@@ -98,11 +106,6 @@ export default function Testimonials() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <div className="flex items-center mb-4">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name} 
-                    className="w-16 h-16 rounded-full mr-4 object-cover"
-                  />
                   <div>
                     <h4 className="font-bold">{testimonial.name}</h4>
                     <p className="text-gray-600 text-sm">{testimonial.role}</p>

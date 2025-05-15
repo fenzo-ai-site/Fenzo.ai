@@ -102,6 +102,7 @@
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.1",
     "typescript": "5.6.3",
+    "vercel": "^41.7.6",
     "vite": "^5.4.14"
   },
   "optionalDependencies": {

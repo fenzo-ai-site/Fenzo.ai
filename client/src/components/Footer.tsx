@@ -63,7 +63,7 @@ export default function Footer() {
             <div className="flex items-center space-x-2 mb-6">
               <Bot className="h-8 w-8 text-white" />
               <span className="font-poppins font-bold text-xl">
-                BizAI <span className="text-accent">Boosters</span>
+                Fenzo AI <span className="text-accent">Boosters</span>
               </span>
             </div>
             <p className="text-gray-400 mb-6">
@@ -97,7 +97,7 @@ export default function Footer() {
         <div className="border-t border-gray-800 pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 mb-4 md:mb-0">
-              &copy; {currentYear} BizAI Boosters. All rights reserved.
+              &copy; {currentYear} Fenzo AI Boosters. All rights reserved.
             </p>
             <div className="flex space-x-6">
               <a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a>

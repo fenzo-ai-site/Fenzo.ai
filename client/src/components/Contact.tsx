@@ -91,7 +91,7 @@ export default function Contact() {
     {
       icon: <Mail className="text-primary" />,
       title: "Email Us",
-      details: ["info@bizaiboosters.in", "support@bizaiboosters.in"]
+      details: ["info@fenzoai.in", "support@fenzoai.in"]
     },
     {
       icon: <Phone className="text-primary" />,

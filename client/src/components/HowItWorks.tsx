@@ -35,7 +35,7 @@ export default function HowItWorks() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold font-poppins mb-4">How BizAI Boosts Your Business</h2>
+          <h2 className="text-3xl md:text-4xl font-bold font-poppins mb-4">How Fenzo AI Boosts Your Business</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Our AI-powered platform automates routine tasks so you can focus on what matters – growing your business.
           </p>
