@@ -1,0 +1,37 @@
+version: 1
+services:
+  app:
+    type: node
+    buildCommand: npm run build
+    startCommand: npm start
+    env:
+      - key: NODE_ENV
+        value: production
+    ports:
+      - port: 5000
+        protocol: http
+
+  client:
+    type: node
+    buildCommand: npm run build
+    startCommand: npm run dev
+    env:
+      - key: NODE_ENV
+        value: production
+    ports:
+      - port: 5173
+        protocol: http
+
+env:
+  - key: DATABASE_URL
+    value: ""
+    description: "Database connection string"
+    required: true
+  - key: OPENAI_API_KEY
+    value: ""
+    description: "OpenAI API Key"
+    required: true
+  - key: JWT_SECRET
+    value: "bizai-boosters-secret-key"
+    description: "JWT Secret Key"
+    required: false
